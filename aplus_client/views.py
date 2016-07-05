@@ -2,6 +2,10 @@ from .client import AplusGraderClient
 
 
 class AplusGraderMixin:
+    """
+    Django view mixin that defines grading_data if submission_url is found
+    from query parameters
+    """
     grading_data = None
 
     def get_aplus_client(self, request, required=False):

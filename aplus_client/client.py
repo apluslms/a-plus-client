@@ -3,11 +3,15 @@ import json
 from urllib.parse import urlsplit, parse_qsl as urlparse_qsl
 from cachetools import TTLCache
 
+
 class NoDefault:
     pass
 
 
 class AplusApiObject:
+    """
+    Base class for generic A-Plus API objects
+    """
     def __init__(self, client, data=None, source_url=None):
         self._client = client
         self._source_url = source_url
@@ -33,6 +37,9 @@ class AplusApiObject:
 
 
 class AplusApiDict(AplusApiObject):
+    """
+    Represents dict types returned from A-Plus API
+    """
     def __init__(self, *args, **kwargs):
         self._data = {}
         super().__init__(*args, **kwargs)
@@ -106,6 +113,9 @@ class AplusApiDict(AplusApiObject):
 
 
 class AplusApiList(AplusApiObject):
+    """
+    Represents list types returned from A-Plus API
+    """
     def __init__(self, *args, **kwargs):
         self._data = []
         super().__init__(*args, **kwargs)
@@ -123,6 +133,8 @@ class AplusApiList(AplusApiObject):
 
 class AplusApiPaginated(AplusApiList):
     """
+    Represents paginated dict types returned from A-Plus API
+
     Response dict is like:
     {
         "count": 1023
@@ -161,6 +173,9 @@ class AplusApiPaginated(AplusApiList):
 
 
 class AplusApiError(AplusApiObject):
+    """
+    Represents error responses from the A-Plus API
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.message = ''
@@ -177,6 +192,10 @@ class AplusApiError(AplusApiObject):
 
 
 class AplusClient:
+    """
+    Base class for A-Plus API client.
+    Handles get/post requests and converting responses to AplusApiObjects
+    """
     def __init__(self, version=None):
         self.api_version = version
         self.cache = TTLCache(maxsize=100, ttl=60)
@@ -216,6 +235,9 @@ class AplusClient:
 
 
 class AplusTokenClient(AplusClient):
+    """
+    Simple extension to A-Plus API client to support token auth
+    """
     def __init__(self, token, **kwargs):
         super().__init__(**kwargs)
         self.token = token
@@ -227,6 +249,10 @@ class AplusTokenClient(AplusClient):
 
 
 class AplusGraderClient(AplusClient):
+    """
+    Extension to A-Plus API client to support submssion_url based
+    A-Plus grading backends.
+    """
     def __init__(self, submission_url, **kwargs):
         super().__init__(**kwargs)
         self.grading_url = submission_url
