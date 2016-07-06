@@ -1,8 +1,10 @@
 import requests
 import json
-from urllib.parse import urlsplit, parse_qsl as urlparse_qsl
+from urllib.parse import urlsplit, urlunsplit, parse_qsl as urlparse_qsl
 from cachetools import TTLCache
 
+TEST_URL_PREFIX = "http://testserver/api/v2/"
+TEST_DATA_PATH = "test_api"
 
 class NoDefault:
     pass
@@ -200,6 +202,7 @@ class AplusClient:
         self.api_version = version
         self.cache = TTLCache(maxsize=100, ttl=60)
         self.session = requests.session()
+        self._debug = True # FIXME
 
     def get_headers(self):
         accept = 'application/vnd.aplus+json'
@@ -220,8 +223,11 @@ class AplusClient:
         return self.session.post(url, headers=headers, data=data, params=params)
 
     def _load_json_data(self, url):
-        if url.startswith('file://'):
-            with open(url.lstrip('file://'), 'r') as f:
+        if self._debug and url.startswith(TEST_URL_PREFIX):
+            furl = url[len(TEST_URL_PREFIX):].strip('/').replace('/', '__')
+            fn = "%s/%s.json" % (TEST_DATA_PATH, furl)
+            print("TEST GET %s -> %s" % (url, fn))
+            with open(fn, 'r') as f:
                 return json.loads(f.read())
         return self.do_get(url).json()
 
@@ -255,9 +261,9 @@ class AplusGraderClient(AplusClient):
     """
     def __init__(self, submission_url, **kwargs):
         super().__init__(**kwargs)
-        self.grading_url = submission_url
-
-        self._params = urlparse_qsl(urlsplit(self.grading_url).query)
+        url = urlsplit(submission_url)
+        self.grading_url = urlunsplit(url[:3] + tuple(('', ''))) # drop query so local cache will ignore auth token
+        self._params = urlparse_qsl(url.query)
         self.grading_data = self.load_data(self.grading_url)
 
     def get_params(self):

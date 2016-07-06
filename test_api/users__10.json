@@ -1,0 +1,10 @@
+{
+	"url": "http://testserver/api/v2/users/10/",
+	"user_id": 10,
+	"student_id": "12345X",
+	"courses": [],
+	"username": "testUser",
+	"first_name": "Superb",
+	"last_name": "Student",
+	"email": "test@example.com"
+}

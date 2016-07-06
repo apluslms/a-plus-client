@@ -1,0 +1,21 @@
+{
+    "id": 1,
+    "url": "http://testserver/api/v2/submissions/1/grading",
+    "students": [
+       {
+           "url": "http://testserver/api/v2/users/10/",
+           "user_id": 10,
+           "username": "testuser"
+       }
+    ],
+    "exercise": "http://testserver/api/v2/exercises/1/",
+    "submission": "http://testserver/api/v2/submissions/1/",
+    "grading_data": null,
+    "next_submission_url": "http://testserver/api/v2/submissions/2/grading",
+    "__": "current aplus submission data",
+    "is_open": true,
+    "max_submissions": 10,
+    "current_submissions": 4,
+    "max_points": 100,
+    "current_points": 100
+}
