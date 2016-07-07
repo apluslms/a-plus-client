@@ -9,7 +9,8 @@ class AplusGraderMixin:
     grading_data = None
 
     def get_aplus_client(self, request, required=False):
-        submission_url = request.GET.get('submission_url', None)
+        self.submission_url = submission_url = request.GET.get('submission_url', None)
+        self.post_url = request.GET.get('post_url', None)
         if submission_url:
             aplus_client = AplusGraderClient(submission_url)
             self.grading_data = aplus_client.grading_data
@@ -18,12 +19,8 @@ class AplusGraderMixin:
 
     def get(self, request, *args, **kwargs):
         fail = self.get_aplus_client(request)
-        if fail:
-            return fail
-        return super().get(request, *args, **kwargs)
+        return fail if fail else super().post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         fail = self.get_aplus_client(request, required=True)
-        if fail:
-            return fail
-        return super().post(request, *args, **kwargs)
+        return fail if fail else super().post(request, *args, **kwargs)
