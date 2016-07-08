@@ -2,18 +2,22 @@
     "id": 1,
     "url": "http://testserver/api/v2/exercises/1/",
     "is_submittable": true,
-    "form_spec": [
-        {
-            "key": "message",
-            "type": "textarea",
-            "title": "Feedback message"
-        }, {
-            "key": "timespent",
-            "type": "number",
-            "title": "Time spent"
-        }, {
-            "key": "name",
-            "type": "string"
-        }
-    ]
+    "exercise_info": {
+        "resources": [ ],
+        "form_spec": [
+            {
+                "key": "message",
+                "type": "textarea",
+                "title": "Feedback message"
+            }, {
+                "key": "timespent",
+                "type": "number",
+                "title": "Time spent"
+            }, {
+                "key": "name",
+                "type": "string"
+            }
+        ]
+    },
+    "models": "http://api/foobar/models"
 }
