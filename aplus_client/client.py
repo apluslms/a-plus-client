@@ -77,7 +77,15 @@ class AplusApiDict(AplusApiObject):
             return True
         return False
 
-    def _get_item(self, key, default=NoDefault):
+    def get_item(self, key, default=NoDefault):
+        """
+        Finds and returns value from dict with key
+
+        If key is not found from stored data, we try to fully load the object
+        and search is repeated.
+
+        In most cases you should use .get() instead to load api urls also
+        """
         try:
             return self._data[key]
         except KeyError as err:
@@ -93,8 +101,15 @@ class AplusApiDict(AplusApiObject):
             raise err
 
     def get(self, key, default=None):
-        value = self._get_item(key, default=default)
-        if isinstance(value, str) and self._url_prefix and value.startswith(self._url_prefix):
+        """
+        Finds and returns value from dict with key
+
+        if the value starts with expected api url it will be loaded and
+        converted to aplus dict
+        """
+        value = self.get_item(key, default=default)
+        if (key != 'url' and isinstance(value, str) and
+            self._url_prefix and value.startswith(self._url_prefix)):
             try:
                 return self._client.load_data(value)
             except:
@@ -192,6 +207,7 @@ class AplusApiError(AplusApiObject):
         self.message = data['detail']
 
 
+CACHE = TTLCache(maxsize=100, ttl=60)
 
 class AplusClient:
     """
@@ -200,7 +216,6 @@ class AplusClient:
     """
     def __init__(self, version=None):
         self.api_version = version
-        self.cache = TTLCache(maxsize=100, ttl=60)
         self.session = requests.session()
         self._debug = True # FIXME
 
@@ -219,24 +234,35 @@ class AplusClient:
         return self.session.get(url, headers=headers, params=params)
 
     def do_post(self, url, data):
+        if self._debug:
+            from django.utils.termcolors import colorize
+            print(colorize("A-Plus client POST %s <- %s" % (url, data), fg='red', opts=('bold',)))
+            if url.startswith(TEST_URL_PREFIX):
+                from collections import namedtuple
+                Response = namedtuple('Response', ('status_code', 'text'))
+                return Response(200, 'ok')
         headers = self.get_headers()
+        params = self.get_params()
         return self.session.post(url, headers=headers, data=data, params=params)
 
     def _load_json_data(self, url):
-        if self._debug and url.startswith(TEST_URL_PREFIX):
-            furl = url[len(TEST_URL_PREFIX):].strip('/').replace('/', '__')
-            fn = "%s/%s.json" % (TEST_DATA_PATH, furl)
-            print("TEST GET %s -> %s" % (url, fn))
-            with open(fn, 'r') as f:
-                return json.loads(f.read())
+        if self._debug:
+            from django.utils.termcolors import colorize
+            print(colorize("A-Plus client GET %s" % (url,), fg='red', opts=('bold',)))
+            if url.startswith(TEST_URL_PREFIX):
+                furl = url[len(TEST_URL_PREFIX):].strip('/').replace('/', '__')
+                fn = "%s/%s.json" % (TEST_DATA_PATH, furl)
+                print(colorize("               \--> %s" % (fn,), fg='red', opts=('bold',)))
+                with open(fn, 'r') as f:
+                    return json.loads(f.read())
         return self.do_get(url).json()
 
     def load_data(self, url):
-        data = self.cache.get(url)
+        data = CACHE.get(url)
         if not data:
             data = self._load_json_data(url)
             data = AplusApiObject._wrap(client=self, data=data, source_url=url)
-            self.cache[url] = data
+            CACHE[url] = data
         return data
 
 
@@ -244,6 +270,7 @@ class AplusTokenClient(AplusClient):
     """
     Simple extension to A-Plus API client to support token auth
     """
+    # TODO: add slumber - http://slumber.readthedocs.io/en/v0.6.0/
     def __init__(self, token, **kwargs):
         super().__init__(**kwargs)
         self.token = token
@@ -264,7 +291,15 @@ class AplusGraderClient(AplusClient):
         url = urlsplit(submission_url)
         self.grading_url = urlunsplit(url[:3] + tuple(('', ''))) # drop query so local cache will ignore auth token
         self._params = urlparse_qsl(url.query)
-        self.grading_data = self.load_data(self.grading_url)
+
+    @property
+    def grading_data(self):
+        data = self.load_data(self.grading_url)
+        self.__dict__['grading_data'] = data
+        return data
+
+    def grade(self, data):
+        return self.do_post(self.grading_url, data)
 
     def get_params(self):
         p = super().get_params()

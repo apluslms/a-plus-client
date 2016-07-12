@@ -11,11 +11,15 @@ class AplusGraderMixin:
     def get_aplus_client(self, request, required=False):
         self.submission_url = submission_url = request.GET.get('submission_url', None)
         self.post_url = request.GET.get('post_url', None)
+        submission_url = "http://testserver/api/v2/submissions/1/grading"
         if submission_url:
-            aplus_client = AplusGraderClient(submission_url)
-            self.grading_data = aplus_client.grading_data
+            self.aplus_client = AplusGraderClient(submission_url)
         elif required:
             return HttpResponseBadRequest("Missing submission_url query parameter")
+
+    @property
+    def grading_data(self):
+        return self.aplus_client.grading_data
 
     def get(self, request, *args, **kwargs):
         fail = self.get_aplus_client(request)
