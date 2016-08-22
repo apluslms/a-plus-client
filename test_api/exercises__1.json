@@ -1,23 +1,36 @@
 {
     "id": 1,
     "url": "http://testserver/api/v2/exercises/1/",
+    "display_name": "Test exercise 1",
+    "course": {
+        "id": 1,
+        "url": "http://testserver/api/v2/courses/1/"
+    },
     "is_submittable": true,
+    "max_points": 2,
+    "max_submissions": 0,
     "exercise_info": {
-        "resources": [ ],
         "form_spec": [
             {
-                "key": "message",
+                "type": "static",
+                "key": "field_0",
+                "description": "<p>Oppimateriaalin lukujen lopuissa oleviin palautelomakkeisiin vastaaminen on pakollinen osa kurssisuoritusta.</p> ",
+                "title": "",
+                "required": false
+            },
+            {
                 "type": "textarea",
-                "title": "Feedback message"
-            }, {
+                "key": "field_1",
+                "description": "<p>Tämän testi lomakkeen kohdalle voit kirjoittaa testi vastauksen.</p> ",
+                "title": "",
+                "required": false
+            },
+            {
                 "key": "timespent",
                 "type": "number",
                 "title": "Time spent"
-            }, {
-                "key": "name",
-                "type": "string"
             }
-        ]
-    },
-    "models": "http://api/foobar/models"
+        ],
+        "resources": [ ]
+    }
 }

@@ -1,6 +1,19 @@
 from .client import AplusGraderClient
 
 
+class Grading:
+    def __init__(self, data):
+        self.__d = data
+
+    @property
+    def form_spec(self):
+        return self.__d.exercise.exercise_info.get_item('form_spec')
+
+    @property
+    def submitters(self):
+        return self.__d.submission.submitters
+
+
 class AplusGraderMixin:
     """
     Django view mixin that defines grading_data if submission_url is found
@@ -11,7 +24,6 @@ class AplusGraderMixin:
     def get_aplus_client(self, request, required=False):
         self.submission_url = submission_url = request.GET.get('submission_url', None)
         self.post_url = request.GET.get('post_url', None)
-        submission_url = "http://testserver/api/v2/submissions/1/grading"
         if submission_url:
             self.aplus_client = AplusGraderClient(submission_url)
         elif required:
@@ -19,7 +31,7 @@ class AplusGraderMixin:
 
     @property
     def grading_data(self):
-        return self.aplus_client.grading_data
+        return Grading(self.aplus_client.grading_data)
 
     def get(self, request, *args, **kwargs):
         fail = self.get_aplus_client(request)
