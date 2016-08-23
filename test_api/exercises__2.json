@@ -1,0 +1,68 @@
+{
+    "id": 2,
+    "url": "http://testserver/api/v2/exercises/2/",
+    "display_name": "Test exercise 2",
+    "course": {
+        "id": 73577357,
+        "url": "http://testserver/api/v2/courses/73577357/"
+    },
+    "is_submittable": true,
+    "max_points": 2,
+    "max_submissions": 0,
+    "exercise_info": {
+        "form_spec": [
+            {
+                "type": "textarea",
+                "key": "message",
+                "title": "Feedback message",
+                "placeholder": "Write your feedback here"
+            },
+            {
+                "type": "help",
+                "value": "You should think your answer a bit"
+            },
+            {
+                "title": "Not everything is editable",
+                "disabled": true
+            },
+            {
+                "type": "number",
+                "key": "timespent",
+                "title": "Time Spent",
+                "description": "Time spent writing this feedback",
+                "value": 10
+            },
+            {
+                "type": "string",
+                "key": "select1",
+                "title": "Dropdown",
+                "enum": ["bar", "fooba", "foo", "baz"],
+                "titleMap": {"bar": "BAR", "foo": "FOO", "fooba": 3, "baz": "BAZ"},
+                "value": "foo"
+            },
+            {
+                "type": "radios",
+                "key": "select2",
+                "title": "Radioselect",
+                "enum": ["bar", "fooba", "foo", "baz"],
+                "titleMap": {"bar": "BAR", "foo": "FOO", "fooba": 3, "baz": "BAZ"},
+                "value": "foo"
+            },
+            {
+                "type": "integer",
+                "key": "select3",
+                "title": "Few numbers",
+                "enum": [0, 1, 2, 3],
+                "value": 2
+            },
+            {
+                "type": "integer",
+                "key": "select4",
+                "title": "Nany numbers",
+                "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                "value": 2
+            }
+        ],
+        "resources": [ ]
+    }
+}

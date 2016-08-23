@@ -1,11 +1,11 @@
 {
-    "id": 1,
-    "url": "http://testserver/api/v2/submission/1/",
+    "id": 2,
+    "url": "http://testserver/api/v2/submission/2/",
     "submission_time": "2016-08-17T14:19:04.539221Z",
-    "html_url": "http://localhost:8080/aplus1/basic_instance/kissa/luku1/submissions/1/",
+    "html_url": "http://localhost:8080/aplus1/basic_instance/kissa/luku1/submissions/2/",
     "exercise": {
-        "id": 1,
-        "url": "http://localhost:8080/api/v2/exercises/1/"
+        "id": 2,
+        "url": "http://localhost:8080/api/v2/exercises/2/"
     },
     "submitters": [
         {

@@ -1,5 +1,5 @@
 {
-    "url": "http://testserver/api/v2/submissions/1/grading/",
+    "url": "http://testserver/api/v2/submissions/1/grader/",
     "submission": {
         "id": 1,
         "url": "http://testserver/api/v2/submissions/1/"

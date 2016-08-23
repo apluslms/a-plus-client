@@ -1,0 +1,13 @@
+{
+    "url": "http://testserver/api/v2/submissions/2/grader/",
+    "submission": {
+        "id": 2,
+        "url": "http://testserver/api/v2/submissions/2/"
+    },
+    "exercise": {
+        "id": 2,
+        "url": "http://testserver/api/v2/exercises/2/"
+    },
+    "grading_data": null,
+    "is_graded": false
+}

@@ -3,8 +3,8 @@
     "url": "http://testserver/api/v2/exercises/1/",
     "display_name": "Test exercise 1",
     "course": {
-        "id": 1,
-        "url": "http://testserver/api/v2/courses/1/"
+        "id": 73577357,
+        "url": "http://testserver/api/v2/courses/73577357/"
     },
     "is_submittable": true,
     "max_points": 2,

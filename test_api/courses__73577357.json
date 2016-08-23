@@ -1,0 +1,10 @@
+{
+    "id": 73577357,
+    "url": "http://testserver/api/v2/courses/73577357/",
+    "code": "TEST-73577357",
+    "name": "Test Test course",
+    "instance_name": "Test course instance",
+    "starting_time": "1970-01-01T00:00:01Z",
+    "ending_time": "2070-01-01T00:00:01Z",
+    "visible_to_students": true
+}
