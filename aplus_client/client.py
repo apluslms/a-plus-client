@@ -2,12 +2,21 @@ import requests
 import json
 from urllib.parse import urlsplit, urlunsplit, parse_qsl as urlparse_qsl
 from cachetools import TTLCache
+from collections import namedtuple
+
+try:
+    from django.utils.termcolors import colorize
+except ImportError:
+    def colorize(msg, *args, **kwargs):
+        return msg
+
 
 TEST_URL_PREFIX = "http://testserver/api/v2/"
 TEST_DATA_PATH = "test_api"
 
-class NoDefault:
-    pass
+
+NoDefault = object()
+FakeResponse = namedtuple('FakeResponse', ('status_code', 'text'))
 
 
 class AplusApiObject:
@@ -48,7 +57,15 @@ class AplusApiDict(AplusApiObject):
         self._update_url_prefix()
 
     def __str__(self):
-        return "<%s(%s)>" % (self.__class__.__name__, self._source_url)
+        return "<{cls}({url})>".format(cls=self.__class__.__name__,
+                                       url=self._source_url)
+
+    def __repr__(self):
+        return "<{cls}({url}) at 0x{id:x}>".format(
+            cls=self.__class__.__name__,
+            url=self._source_url or self._full_url,
+            id=id(self),
+        )
 
     def _update_url_prefix(self):
         url = self._source_url or self._full_url
@@ -118,6 +135,13 @@ class AplusApiDict(AplusApiObject):
 
     def __getitem__(self, key):
         return self.get(key, default=NoDefault)
+
+    def __contains__(self, key):
+        try:
+            self.get_item(key)
+            return True
+        except KeyError:
+            return False
 
     def keys(self):
         return self._data.keys()
@@ -214,10 +238,10 @@ class AplusClient:
     Base class for A-Plus API client.
     Handles get/post requests and converting responses to AplusApiObjects
     """
-    def __init__(self, version=None):
+    def __init__(self, version=None, debug_enabled=True):
         self.api_version = version
         self.session = requests.session()
-        self._debug = True # FIXME
+        self._debug = debug_enabled
 
     def get_headers(self):
         accept = 'application/vnd.aplus+json'
@@ -235,27 +259,31 @@ class AplusClient:
 
     def do_post(self, url, data):
         if self._debug:
-            from django.utils.termcolors import colorize
-            print(colorize("A-Plus client POST %s <- %s" % (url, data), fg='red', opts=('bold',)))
+            print(colorize("A-Plus client POST {} <- {}".format(url, data), fg='red', opts=('bold',)))
             if url.startswith(TEST_URL_PREFIX):
-                from collections import namedtuple
-                Response = namedtuple('Response', ('status_code', 'text'))
-                return Response(200, 'ok')
+                return FakeResponse(200, 'ok')
         headers = self.get_headers()
         params = self.get_params()
         return self.session.post(url, headers=headers, data=data, params=params)
 
     def _load_json_data(self, url):
         if self._debug:
-            from django.utils.termcolors import colorize
-            print(colorize("A-Plus client GET %s" % (url,), fg='red', opts=('bold',)))
+            print(colorize("A-Plus client GET {}".format(url), fg='red', opts=('bold',)))
             if url.startswith(TEST_URL_PREFIX):
                 furl = url[len(TEST_URL_PREFIX):].strip('/').replace('/', '__')
-                fn = "%s/%s.json" % (TEST_DATA_PATH, furl)
-                print(colorize("               \--> %s" % (fn,), fg='red', opts=('bold',)))
+                fn = ''.join((TEST_DATA_PATH, '/', furl, ".json"))
+                print(colorize("               \--> {}".format(fn), fg='red', opts=('bold',)))
                 with open(fn, 'r') as f:
-                    return json.loads(f.read())
-        return self.do_get(url).json()
+                    try:
+                        return json.loads(f.read())
+                    except ValueError as e:
+                        raise ValueError("Json error in {}: {}".format(fn, e))
+        resp = self.do_get(url)
+        # FIXME: if resp.status != 200:
+        try:
+            return resp.json()
+        except ValueError:
+            return None
 
     def load_data(self, url):
         data = CACHE.get(url)
