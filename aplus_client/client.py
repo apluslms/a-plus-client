@@ -87,7 +87,7 @@ class AplusApiDict(AplusApiObject):
     def load_all(self):
         furl = self._full_url
         if furl and self._source_url != furl:
-            data = self._client._load_json_data(furl)
+            data = self._client._load_cached_data(furl)
             self.add_data(data)
             self._source_url = furl
             self._update_url_prefix()
@@ -129,7 +129,7 @@ class AplusApiDict(AplusApiObject):
             self._url_prefix and value.startswith(self._url_prefix)):
             try:
                 return self._client.load_data(value)
-            except:
+            except: # FIXME: too wide
                 print("ERROR: couldn't get json for %s" % (value,))
         return AplusApiObject._wrap(self._client, value)
 
@@ -285,13 +285,16 @@ class AplusClient:
         except ValueError:
             return None
 
-    def load_data(self, url):
-        data = CACHE.get(url)
-        if not data:
+    def _load_cached_data(self, url):
+        data = CACHE.get(url, None)
+        if data is None:
             data = self._load_json_data(url)
-            data = AplusApiObject._wrap(client=self, data=data, source_url=url)
             CACHE[url] = data
         return data
+
+    def load_data(self, url):
+        data = self._load_cached_data(url)
+        return AplusApiObject._wrap(client=self, data=data, source_url=url)
 
 
 class AplusTokenClient(AplusClient):
