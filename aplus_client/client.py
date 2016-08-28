@@ -1,14 +1,9 @@
 import requests
 import json
+import logging
 from urllib.parse import urlsplit, urlunsplit, parse_qsl as urlparse_qsl
 from cachetools import TTLCache
 from collections import namedtuple
-
-try:
-    from django.utils.termcolors import colorize
-except ImportError:
-    def colorize(msg, *args, **kwargs):
-        return msg
 
 
 TEST_URL_PREFIX = "http://testserver/api/v2/"
@@ -17,6 +12,9 @@ TEST_DATA_PATH = "test_api"
 
 NoDefault = object()
 FakeResponse = namedtuple('FakeResponse', ('status_code', 'text'))
+
+
+logger = logging.getLogger('aplus_client.client')
 
 
 class AplusApiObject:
@@ -255,29 +253,29 @@ class AplusClient:
     def do_get(self, url):
         headers = self.get_headers()
         params = self.get_params()
+        logger.critical("making GET '%s', headers=%r, params=%r", url, headers, params)
         return self.session.get(url, headers=headers, params=params)
 
     def do_post(self, url, data):
-        if self._debug:
-            print(colorize("A-Plus client POST {} <- {}".format(url, data), fg='red', opts=('bold',)))
-            if url.startswith(TEST_URL_PREFIX):
-                return FakeResponse(200, 'ok')
+        if self._debug and url.startswith(TEST_URL_PREFIX):
+            logger.debug("making test POST '%s', data=%r", url, data)
+            return FakeResponse(200, 'ok')
+
         headers = self.get_headers()
         params = self.get_params()
+        logger.debug("making POST '%s', headers=%r, params=%r, data=%r", url, headers, params, data)
         return self.session.post(url, headers=headers, data=data, params=params)
 
     def _load_json_data(self, url):
-        if self._debug:
-            print(colorize("A-Plus client GET {}".format(url), fg='red', opts=('bold',)))
-            if url.startswith(TEST_URL_PREFIX):
-                furl = url[len(TEST_URL_PREFIX):].strip('/').replace('/', '__')
-                fn = ''.join((TEST_DATA_PATH, '/', furl, ".json"))
-                print(colorize("               \--> {}".format(fn), fg='red', opts=('bold',)))
-                with open(fn, 'r') as f:
-                    try:
-                        return json.loads(f.read())
-                    except ValueError as e:
-                        raise ValueError("Json error in {}: {}".format(fn, e))
+        if self._debug and url.startswith(TEST_URL_PREFIX):
+            furl = url[len(TEST_URL_PREFIX):].strip('/').replace('/', '__')
+            fn = ''.join((TEST_DATA_PATH, '/', furl, ".json"))
+            logger.debug("making test GET '%s', file=%r", url,fn)
+            with open(fn, 'r') as f:
+                try:
+                    return json.loads(f.read())
+                except ValueError as e:
+                    raise ValueError("Json error in {}: {}".format(fn, e))
         resp = self.do_get(url)
         # FIXME: if resp.status != 200:
         try:
@@ -290,6 +288,8 @@ class AplusClient:
         if data is None:
             data = self._load_json_data(url)
             CACHE[url] = data
+        else:
+            logger.debug("cache hit for %r", url)
         return data
 
     def load_data(self, url):
