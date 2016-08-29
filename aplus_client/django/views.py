@@ -1,6 +1,7 @@
 from urllib.parse import urljoin, urlencode
 from django.conf import settings
 from django.http import HttpResponseBadRequest
+from django.utils import translation
 
 from ..client import (
     TEST_URL_PREFIX,
@@ -23,12 +24,25 @@ class GradingWrapper:
         return self.__d.exercise.course
 
     @property
+    def language(self):
+        try:
+            return self.__d.exercise.course.language or None
+        except AttributeError:
+            return None
+
+    @property
     def form_spec(self):
-        return self.__d.exercise.exercise_info.get_item('form_spec')
+        try:
+            return self.__d.exercise.exercise_info.get_item('form_spec')
+        except (AttributeError, KeyError):
+            return None
 
     @property
     def submitters(self):
-        return self.__d.submission.submitters
+        try:
+            return self.__d.submission.submitters
+        except AttributeError:
+            return None
 
 
 class AplusGraderMixin:
@@ -56,6 +70,10 @@ class AplusGraderMixin:
         self.submission_url = submission_url
         self.post_url = post_url
         self.aplus_client = AplusGraderClient(submission_url, debug_enabled=settings.DEBUG)
+
+        # i18n
+        language = self.grading_data.language
+        translation.activate(language)
 
     @property
     def grading_data(self):
