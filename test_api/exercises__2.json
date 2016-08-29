@@ -1,7 +1,8 @@
 {
     "id": 2,
     "url": "http://testserver/api/v2/exercises/2/",
-    "display_name": "Test exercise 2",
+    "display_name": "2. Test exercise 2",
+    "name": "Test exercise 2",
     "course": {
         "id": 73577357,
         "url": "http://testserver/api/v2/courses/73577357/"
