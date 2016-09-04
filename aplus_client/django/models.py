@@ -98,12 +98,12 @@ class CachedApiObject(models.Model):
 
 
 class NamespacedApiManager(CachedApiManager):
-    def by_namespace(self, namespace):
+    def using_namespace(self, namespace):
         if not isinstance(namespace, ApiNamespace):
             namespace = ApiNamespace.get_by_url(namespace)
         return self.filter(namespace=namespace)
 
-    def by_namespace_id(self, namespace_id):
+    def using_namespace_id(self, namespace_id):
         return self.filter(namespace_id=namespace_id)
 
     def get_new_or_updated(self, api_obj, **kwargs):
@@ -160,7 +160,7 @@ class NestedApiObject(CachedApiObject):
     Manager = NestedApiManager
     objects = Manager()
 
-    api_id = models.IntegerField(db_index=True)
+    api_id = models.IntegerField()
 
     class Meta:
         abstract = True
