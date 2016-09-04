@@ -239,7 +239,21 @@ class AplusClient:
     def __init__(self, version=None, debug_enabled=True):
         self.api_version = version
         self.session = requests.session()
+        self.__params = {}
         self._debug = debug_enabled
+
+    @staticmethod
+    def normalize_url(url):
+        url = urlsplit(url)
+        if not url.netloc:
+            raise AttributeError("Invalid URL for api client: no network location")
+        if not url.scheme:
+            port = url.port
+            url = url._replace(scheme = 'https' if not port or port == 443 else 'http')
+
+        params = urlparse_qsl(url.query)
+        url = url._replace(query='', fragment='')
+        return url.geturl(), params
 
     def get_headers(self):
         accept = 'application/vnd.aplus+json'
@@ -247,8 +261,11 @@ class AplusClient:
             accept += '; version=%s' % (self.api_version,)
         return {'Accept': accept}
 
+    def update_params(self, params):
+        self.__params.update(params)
+
     def get_params(self):
-        return {}
+        return self.__params
 
     def do_get(self, url):
         headers = self.get_headers()
@@ -319,9 +336,9 @@ class AplusGraderClient(AplusClient):
     """
     def __init__(self, submission_url, **kwargs):
         super().__init__(**kwargs)
-        url = urlsplit(submission_url)
-        self.grading_url = urlunsplit(url[:3] + tuple(('', ''))) # drop query so local cache will ignore auth token
-        self._params = urlparse_qsl(url.query)
+        url, params = self.normalize_url(submission_url)
+        self.grading_url = url
+        self.update_params(params)
 
     @property
     def grading_data(self):
@@ -331,8 +348,3 @@ class AplusGraderClient(AplusClient):
 
     def grade(self, data):
         return self.do_post(self.grading_url, data)
-
-    def get_params(self):
-        p = super().get_params()
-        p.update(self._params)
-        return p
