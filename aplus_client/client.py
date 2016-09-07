@@ -1,18 +1,12 @@
 import requests
-import json
 import logging
 from urllib.parse import urlsplit, urlunsplit, parse_qsl as urlparse_qsl
 from cachetools import TTLCache
-from collections import namedtuple
 
-
-TEST_URL_PREFIX = "http://testserver/api/v2/"
-TEST_DATA_PATH = "test_api"
+from .debugging import AplusClientDebugging
 
 
 NoDefault = object()
-FakeResponse = namedtuple('FakeResponse', ('status_code', 'text'))
-
 
 logger = logging.getLogger('aplus_client.client')
 
@@ -231,16 +225,23 @@ class AplusApiError(AplusApiObject):
 
 CACHE = TTLCache(maxsize=100, ttl=60)
 
-class AplusClient:
+class AplusClientMetaclass(type):
+    def __call__(cls, *args, **kwargs):
+        debug = kwargs.pop('debug_enabled', False)
+        if debug:
+            cls = type(cls.__name__ + 'Debuging', (AplusClientDebugging, cls), {})
+        return type.__call__(cls, *args, **kwargs)
+
+
+class AplusClient(metaclass=AplusClientMetaclass):
     """
     Base class for A-Plus API client.
     Handles get/post requests and converting responses to AplusApiObjects
     """
-    def __init__(self, version=None, debug_enabled=True):
+    def __init__(self, version=None):
         self.api_version = version
         self.session = requests.session()
         self.__params = {}
-        self._debug = debug_enabled
 
     @staticmethod
     def normalize_url(url):
@@ -270,29 +271,16 @@ class AplusClient:
     def do_get(self, url):
         headers = self.get_headers()
         params = self.get_params()
-        logger.critical("making GET '%s', headers=%r, params=%r", url, headers, params)
+        logger.debug("making GET '%s', headers=%r, params=%r", url, headers, params)
         return self.session.get(url, headers=headers, params=params)
 
     def do_post(self, url, data):
-        if self._debug and url.startswith(TEST_URL_PREFIX):
-            logger.debug("making test POST '%s', data=%r", url, data)
-            return FakeResponse(200, 'ok')
-
         headers = self.get_headers()
         params = self.get_params()
         logger.debug("making POST '%s', headers=%r, params=%r, data=%r", url, headers, params, data)
         return self.session.post(url, headers=headers, data=data, params=params)
 
     def _load_json_data(self, url):
-        if self._debug and url.startswith(TEST_URL_PREFIX):
-            furl = url[len(TEST_URL_PREFIX):].strip('/').replace('/', '__')
-            fn = ''.join((TEST_DATA_PATH, '/', furl, ".json"))
-            logger.debug("making test GET '%s', file=%r", url,fn)
-            with open(fn, 'r') as f:
-                try:
-                    return json.loads(f.read())
-                except ValueError as e:
-                    raise ValueError("Json error in {}: {}".format(fn, e))
         resp = self.do_get(url)
         # FIXME: if resp.status != 200:
         try:

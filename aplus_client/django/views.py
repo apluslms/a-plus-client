@@ -3,10 +3,8 @@ from django.conf import settings
 from django.http import HttpResponseBadRequest
 from django.utils import translation
 
-from ..client import (
-    TEST_URL_PREFIX,
-    AplusGraderClient,
-)
+from ..client import AplusGraderClient
+from ..debugging import TEST_URL_PREFIX
 
 TEST_EXC_URL = urljoin(TEST_URL_PREFIX, "exercises/2/grader/")
 TEST_SUB_URL = urljoin(TEST_URL_PREFIX, "submissions/2/grader/")
