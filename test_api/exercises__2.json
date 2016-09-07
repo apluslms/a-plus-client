@@ -27,10 +27,28 @@
                 "disabled": true
             },
             {
+                "type": "text",
+                "key": "name",
+                "title": "Name",
+                "validationMessage": {
+                    "min_length": "Name is too short",
+                    "max_length": "Name is too longh",
+                    "required": "Please give us your name",
+                    "": "Name is between 5 and 20 characters andly only lowercase letters"
+                },
+                "minLength": 5,
+                "maxLength": 20,
+                "pattern": "^[a-x]*$",
+                "required": true
+            },
+            {
                 "type": "number",
                 "key": "timespent",
                 "title": "Time Spent",
                 "description": "Time spent writing this feedback",
+                "validationMessage": "Time given is not in any way valid...",
+                "minimum": 9,
+                "maximum": 1000,
                 "value": 10
             },
             {
