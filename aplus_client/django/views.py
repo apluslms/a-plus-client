@@ -1,3 +1,4 @@
+from functools import wraps
 from urllib.parse import urljoin, urlencode
 from django.conf import settings
 from django.http import HttpResponseBadRequest
@@ -6,41 +7,49 @@ from django.utils import translation
 from ..client import AplusGraderClient
 from ..debugging import TEST_URL_PREFIX
 
+
 TEST_EXC_URL = urljoin(TEST_URL_PREFIX, "exercises/2/grader/")
 TEST_SUB_URL = urljoin(TEST_URL_PREFIX, "submissions/2/grader/")
+
+
+def none_on_attributeerror(func):
+    @wraps(func)
+    def wrap(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except AttributeError:
+            return None
+    return wrap
+
 
 class GradingWrapper:
     def __init__(self, data):
         self.__d = data
 
     @property
+    @none_on_attributeerror
     def exercise(self):
         return self.__d.exercise
 
     @property
+    @none_on_attributeerror
     def course(self):
         return self.__d.exercise.course
 
     @property
+    @none_on_attributeerror
     def language(self):
-        try:
-            return self.__d.exercise.course.language or None
-        except AttributeError:
-            return None
+        return self.__d.exercise.course.language or None
 
     @property
+    @none_on_attributeerror
     def form_spec(self):
-        try:
-            return self.__d.exercise.exercise_info.get_item('form_spec')
-        except (AttributeError, KeyError):
-            return None
+        return self.__d.exercise.exercise_info.get_item('form_spec')
 
     @property
+    @none_on_attributeerror
     def submitters(self):
-        try:
-            return self.__d.submission.submitters
-        except AttributeError:
-            return None
+        return self.__d.submission.submitters
 
 
 class AplusGraderMixin:

@@ -3,12 +3,22 @@ import logging
 from urllib.parse import urlsplit, urlunsplit, parse_qsl as urlparse_qsl
 from cachetools import TTLCache
 
-from .debugging import AplusClientDebugging
+from .debugging import AplusClientDebugging, FakeResponse
 
 
 NoDefault = object()
 
 logger = logging.getLogger('aplus_client.client')
+
+
+class ConnectionErrorResponse(FakeResponse):
+    """
+    Represents ConnectionError exception as fake response object
+    We use error code 504 'Gateway Timeout'
+    """
+    def __init__(self, error, url):
+        logger.critical("%s when requesting url '%s': %s", error.__class__.__name__, url, error)
+        super().__init__(url, 504, '')
 
 
 class AplusApiObject:
@@ -272,17 +282,24 @@ class AplusClient(metaclass=AplusClientMetaclass):
         headers = self.get_headers()
         params = self.get_params()
         logger.debug("making GET '%s', headers=%r, params=%r", url, headers, params)
-        return self.session.get(url, headers=headers, params=params)
+        try:
+            return self.session.get(url, headers=headers, params=params)
+        except requests.exceptions.ConnectionError as err:
+            return ConnectionErrorResponse(err, url)
 
     def do_post(self, url, data):
         headers = self.get_headers()
         params = self.get_params()
         logger.debug("making POST '%s', headers=%r, params=%r, data=%r", url, headers, params, data)
-        return self.session.post(url, headers=headers, data=data, params=params)
+        try:
+            return self.session.post(url, headers=headers, data=data, params=params)
+        except requests.exceptions.ConnectionError as err:
+            return ConnectionErrorResponse(err, url)
 
     def _load_json_data(self, url):
         resp = self.do_get(url)
-        # FIXME: if resp.status != 200:
+        if resp.status_code != 200:
+            return None
         try:
             return resp.json()
         except ValueError:
