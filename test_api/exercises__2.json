@@ -52,34 +52,40 @@
                 "value": 10
             },
             {
-                "type": "string",
-                "key": "select1",
-                "title": "Dropdown",
-                "enum": ["bar", "fooba", "foo", "baz"],
-                "titleMap": {"bar": "BAR", "foo": "FOO", "fooba": 3, "baz": "BAZ"},
-                "value": "foo"
-            },
-            {
-                "type": "radios",
-                "key": "select2",
-                "title": "Radioselect",
-                "enum": ["bar", "fooba", "foo", "baz"],
-                "titleMap": {"bar": "BAR", "foo": "FOO", "fooba": 3, "baz": "BAZ"},
-                "value": "foo"
-            },
-            {
-                "type": "integer",
-                "key": "select3",
-                "title": "Few numbers",
-                "enum": [0, 1, 2, 3],
-                "value": 2
-            },
-            {
-                "type": "integer",
-                "key": "select4",
-                "title": "Nany numbers",
-                "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-                "value": 2
+                "type": "object",
+                "key": "extra_selections",
+                "properties": [
+                    {
+                        "type": "string",
+                        "key": "select1",
+                        "title": "Dropdown",
+                        "enum": ["bar", "fooba", "foo", "baz"],
+                        "titleMap": {"bar": "BAR", "foo": "FOO", "fooba": 3, "baz": "BAZ"},
+                        "value": "foo"
+                    },
+                    {
+                        "type": "radios",
+                        "key": "select2",
+                        "title": "Radioselect",
+                        "enum": ["bar", "fooba", "foo", "baz"],
+                        "titleMap": {"bar": "BAR", "foo": "FOO", "fooba": 3, "baz": "BAZ"},
+                        "value": "foo"
+                    },
+                    {
+                        "type": "integer",
+                        "key": "select3",
+                        "title": "Few numbers",
+                        "enum": [0, 1, 2, 3],
+                        "value": 2
+                    },
+                    {
+                        "type": "integer",
+                        "key": "select4",
+                        "title": "Nany numbers",
+                        "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                        "value": 2
+                    }
+                ]
             }
         ],
         "resources": [ ]
