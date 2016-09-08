@@ -20,6 +20,7 @@
             },
             {
                 "type": "help",
+                "htmlClass": "help_class",
                 "value": "You should think your answer a bit"
             },
             {
@@ -36,6 +37,8 @@
                     "required": "Please give us your name",
                     "": "Name is between 5 and 20 characters andly only lowercase letters"
                 },
+                "htmlClass": "div_class",
+                "fieldHtmlClass": "input_class",
                 "minLength": 5,
                 "maxLength": 20,
                 "pattern": "^[a-x]*$",
