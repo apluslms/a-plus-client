@@ -2,6 +2,7 @@
     "id": 2,
     "url": "http://testserver/api/v2/exercises/2/",
     "display_name": "2. Test exercise 2",
+    "html_url": "#aplus_exercise_2",
     "name": "Test exercise 2",
     "course": {
         "id": 73577357,

@@ -3,6 +3,7 @@
     "url": "http://testserver/api/v2/courses/73577357/",
     "code": "TEST-73577357",
     "name": "Test Test course",
+    "html_url": "#aplus_course_73577357",
     "instance_name": "Test course instance",
     "starting_time": "1970-01-01T00:00:01Z",
     "ending_time": "2070-01-01T00:00:01Z",
