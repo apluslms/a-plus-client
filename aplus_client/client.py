@@ -283,7 +283,7 @@ class AplusClient(metaclass=AplusClientMetaclass):
         params = self.get_params()
         logger.debug("making GET '%s', headers=%r, params=%r", url, headers, params)
         try:
-            return self.session.get(url, headers=headers, params=params)
+            return self.session.get(url, headers=headers, params=params, timeout=(5, 20))
         except requests.exceptions.ConnectionError as err:
             return ConnectionErrorResponse(err, url)
 
