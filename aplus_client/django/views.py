@@ -52,6 +52,21 @@ class GradingWrapper:
         return self.__d.submission.submitters
 
 
+def bad_submission_url(url):
+    rel = not any((
+        url.startswith(s)
+        for s in ('http://', 'https://', '//')
+    ))
+    if rel:
+        return True
+    url = url.split('//', 1)[1]
+    local = any((
+        url.startswith(s)
+        for s in ('localhost', '127.0.0.1', 'testserver')
+    ))
+    return local
+
+
 class AplusGraderMixin:
     """
     Django view mixin that defines grading_data if submission_url is found
@@ -62,16 +77,19 @@ class AplusGraderMixin:
     def get_aplus_client(self, request):
         submission_url = request.GET.get('submission_url', None)
         post_url = request.GET.get('post_url', None)
+        debug = settings.DEBUG
 
         if not submission_url:
-            if settings.DEBUG:
+            if debug:
                 # When we DEBUG mode is on, we use test resource
                 is_safe = request.method in ('GET', 'HEAD', 'OPTIONS')
                 submission_url = TEST_EXC_URL if is_safe else TEST_SUB_URL
                 post_url = request.build_absolute_uri('?' + urlencode([('submission_url', TEST_SUB_URL)]))
             else:
                 return HttpResponseBadRequest("Missing required submission_url query parameter")
-        elif not post_url and settings.DEBUG:
+        elif bad_submission_url(submission_url) and not debug:
+            return HttpResponseBadRequest("Bad submission_url in query parameter")
+        elif not post_url and debug:
             post_url = request.build_absolute_uri('?' + urlencode([('submission_url', submission_url)]))
 
         self.submission_url = submission_url
