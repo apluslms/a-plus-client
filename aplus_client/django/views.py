@@ -1,4 +1,3 @@
-from functools import wraps
 from urllib.parse import urljoin, urlencode
 from django.conf import settings
 from django.http import HttpResponseBadRequest
@@ -11,45 +10,6 @@ from ..debugging import TEST_URL_PREFIX
 TEST_EXC_URL = urljoin(TEST_URL_PREFIX, "exercises/2/grader/")
 TEST_SUB_URL = urljoin(TEST_URL_PREFIX, "submissions/2/grader/")
 
-
-def none_on_attributeerror(func):
-    @wraps(func)
-    def wrap(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except AttributeError:
-            return None
-    return wrap
-
-
-class GradingWrapper:
-    def __init__(self, data):
-        self.__d = data
-
-    @property
-    @none_on_attributeerror
-    def exercise(self):
-        return self.__d.exercise
-
-    @property
-    @none_on_attributeerror
-    def course(self):
-        return self.__d.exercise.course
-
-    @property
-    @none_on_attributeerror
-    def language(self):
-        return self.__d.exercise.course.language or None
-
-    @property
-    @none_on_attributeerror
-    def form_spec(self):
-        return self.__d.exercise.exercise_info.get_item('form_spec')
-
-    @property
-    @none_on_attributeerror
-    def submitters(self):
-        return self.__d.submission.submitters
 
 
 def bad_submission_url(url):
@@ -102,7 +62,7 @@ class AplusGraderMixin:
 
     @property
     def grading_data(self):
-        return GradingWrapper(self.aplus_client.grading_data)
+        return self.aplus_client.grading_data
 
     def get(self, request, *args, **kwargs):
         fail = self.get_aplus_client(request)
