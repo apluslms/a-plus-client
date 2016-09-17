@@ -44,17 +44,21 @@ class AplusGraderMixin:
                 # When we DEBUG mode is on, we use test resource
                 is_safe = request.method in ('GET', 'HEAD', 'OPTIONS')
                 submission_url = TEST_EXC_URL if is_safe else TEST_SUB_URL
-                post_url = request.build_absolute_uri('?' + urlencode([('submission_url', TEST_SUB_URL)]))
+                params = request.GET.copy()
+                params['submission_url'] = TEST_SUB_URL
+                post_url = request.build_absolute_uri('?' + urlencode(params))
             else:
                 return HttpResponseBadRequest("Missing required submission_url query parameter")
         elif bad_submission_url(submission_url) and not debug:
             return HttpResponseBadRequest("Bad submission_url in query parameter")
         elif not post_url and debug:
-            post_url = request.build_absolute_uri('?' + urlencode([('submission_url', submission_url)]))
+            params = request.GET.copy()
+            params['submission_url'] = submission_url
+            post_url = request.build_absolute_uri('?' + urlencode(params))
 
         self.submission_url = submission_url
         self.post_url = post_url
-        self.aplus_client = AplusGraderClient(submission_url, debug_enabled=settings.DEBUG)
+        self.aplus_client = AplusGraderClient(submission_url, debug_enabled=debug)
 
         # i18n
         language = self.grading_data.language
