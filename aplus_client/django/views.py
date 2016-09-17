@@ -37,6 +37,7 @@ class AplusGraderMixin:
     def get_aplus_client(self, request):
         submission_url = request.GET.get('submission_url', None)
         post_url = request.GET.get('post_url', None)
+        language = request.GET.get('lang', None)
         debug = settings.DEBUG
 
         if not submission_url:
@@ -61,8 +62,10 @@ class AplusGraderMixin:
         self.aplus_client = AplusGraderClient(submission_url, debug_enabled=debug)
 
         # i18n
-        language = self.grading_data.language
-        translation.activate(language)
+        if not language:
+            language = self.grading_data.language
+        if language:
+            translation.activate(language)
 
     @property
     def grading_data(self):
