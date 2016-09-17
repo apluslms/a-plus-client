@@ -90,10 +90,11 @@ class AplusApiDict(AplusApiObject):
         furl = self._full_url
         if furl and self._source_url != furl:
             data = self._client._load_cached_data(furl)
-            self.add_data(data)
-            self._source_url = furl
-            self._update_url_prefix()
-            return True
+            if data:
+                self.add_data(data)
+                self._source_url = furl
+                self._update_url_prefix()
+                return True
         return False
 
     def get_item(self, key, default=NoDefault):
@@ -283,8 +284,8 @@ class AplusClient(metaclass=AplusClientMetaclass):
         params = self.get_params()
         logger.debug("making GET '%s', headers=%r, params=%r", url, headers, params)
         try:
-            return self.session.get(url, headers=headers, params=params, timeout=(5, 20))
-        except requests.exceptions.ConnectionError as err:
+            return self.session.get(url, headers=headers, params=params, timeout=(3.2, 9.6))
+        except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as err:
             return ConnectionErrorResponse(err, url)
 
     def do_post(self, url, data):
@@ -292,13 +293,14 @@ class AplusClient(metaclass=AplusClientMetaclass):
         params = self.get_params()
         logger.debug("making POST '%s', headers=%r, params=%r, data=%r", url, headers, params, data)
         try:
-            return self.session.post(url, headers=headers, data=data, params=params)
-        except requests.exceptions.ConnectionError as err:
+            return self.session.post(url, headers=headers, data=data, params=params, timeout=(3.2, 9.6))
+        except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as err:
             return ConnectionErrorResponse(err, url)
 
     def _load_json_data(self, url):
         resp = self.do_get(url)
         if resp.status_code != 200:
+            logger.info("Got status %d from url %s", resp.status_code, url)
             return None
         try:
             return resp.json()
@@ -309,7 +311,8 @@ class AplusClient(metaclass=AplusClientMetaclass):
         data = CACHE.get(url, None)
         if data is None:
             data = self._load_json_data(url)
-            CACHE[url] = data
+            if data:
+                CACHE[url] = data
         else:
             logger.debug("cache hit for %r", url)
         return data
