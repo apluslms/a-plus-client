@@ -68,12 +68,11 @@
                         "value": "foo"
                     },
                     {
-                        "type": "radios",
+                        "type": "checkboxes",
                         "key": "select2",
-                        "title": "Radioselect",
+                        "title": "Checkbox",
                         "enum": ["bar", "fooba", "foo", "baz"],
-                        "titleMap": {"bar": "BAR", "foo": "FOO", "fooba": 3, "baz": "BAZ"},
-                        "value": "foo"
+                        "titleMap": {"bar": "BAR", "foo": "FOO", "fooba": 3, "baz": "BAZ"}
                     },
                     {
                         "type": "integer",
@@ -90,6 +89,12 @@
                         "value": 2
                     }
                 ]
+            },
+            {
+                "type": "boolean",
+                "key": "accept",
+                "title": "Accept all aobve inputs?",
+                "required": true
             }
         ],
         "resources": [ ]

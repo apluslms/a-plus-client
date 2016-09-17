@@ -2,7 +2,9 @@
     "url": "http://testserver/api/v2/submissions/2/grader/",
     "submission": {
         "id": 2,
-        "url": "http://testserver/api/v2/submissions/2/"
+        "url": "http://testserver/api/v2/submissions/2/",
+        "submission_time": null,
+        "html_url": "#aplus_submission2/"
     },
     "exercise": {
         "id": 2,
