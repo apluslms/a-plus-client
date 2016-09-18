@@ -29,10 +29,7 @@ class ApiNamespace(models.Model):
         return self.domain
 
 
-class CachedApiManager(models.Manager):
-    def get_by_api_obj(self, api_obj):
-        raise NotImplementedError("Childs of ChachedApiObject should implement cls.get_by_api_obj()")
-
+class CachedApiQuerySet(models.QuerySet):
     def get_new_or_updated(self, api_obj, **kwargs):
         obj, created = self.get_or_create(api_obj, **kwargs)
         if not created and obj.should_be_updated:
@@ -41,8 +38,12 @@ class CachedApiManager(models.Manager):
         return obj
 
     def get_or_create(self, api_obj, **kwargs):
+        select_related = kwargs.pop('select_related', None)
         try:
-            return self.get(api_id=api_obj.id, **kwargs), False
+            qs = self
+            if select_related:
+                qs = qs.select_related(*select_related)
+            return qs.get(api_id=api_obj.id, **kwargs), False
         except ObjectDoesNotExist:
             return self.create(api_obj, **kwargs), True
 
@@ -57,6 +58,11 @@ class CachedApiManager(models.Manager):
             obj.url = api_obj.url
         obj.update_with(api_obj, **kwargs)
 
+    update_object.queryset_only = True
+
+
+CachedApiManager = models.Manager.from_queryset(CachedApiQuerySet)
+
 
 class CachedApiObject(models.Model):
     TTL = datetime.timedelta(hours=1)
@@ -65,7 +71,7 @@ class CachedApiObject(models.Model):
         abstract = True
         get_latest_by = 'updated'
 
-    # api_id - defined by subclass
+    api_id = models.IntegerField()
     url = models.URLField()
     updated = models.DateTimeField(auto_now=True)
 
@@ -97,7 +103,7 @@ class CachedApiObject(models.Model):
             setattr(self, name, value)
 
 
-class NamespacedApiManager(CachedApiManager):
+class NamespacedApiQuerySet(CachedApiQuerySet):
     def using_namespace(self, namespace):
         if not isinstance(namespace, ApiNamespace):
             namespace = ApiNamespace.get_by_url(namespace)
@@ -122,18 +128,17 @@ class NamespacedApiManager(CachedApiManager):
 
 
 class NamespacedApiObject(CachedApiObject):
-    Manager = NamespacedApiManager
+    Manager = CachedApiManager.from_queryset(NamespacedApiQuerySet)
     objects = Manager()
 
     namespace = models.ForeignKey(ApiNamespace, on_delete=models.PROTECT)
-    api_id = models.IntegerField()
 
     class Meta:
         abstract = True
         unique_together = ('namespace', 'api_id')
 
 
-class NestedApiManager(CachedApiManager):
+class NestedApiQuerySet(CachedApiQuerySet):
     @cached_property
     def namespace_filter(self):
         return self.model.NAMESPACE_FILTER
@@ -142,11 +147,6 @@ class NestedApiManager(CachedApiManager):
         if 'namespace' in kwargs:
             kwargs[self.namespace_filter] = kwargs.pop('namespace')
         return super().filter(*args, **kwargs)
-
-    def get(self, *args, **kwargs):
-        if 'namespace' in kwargs:
-            kwargs[self.namespace_filter] = kwargs.pop('namespace')
-        return super().get(*args, **kwargs)
 
     def get_new_or_updated(self, api_obj, **kwargs):
         if 'namespace' not in kwargs:
@@ -157,10 +157,8 @@ class NestedApiManager(CachedApiManager):
 class NestedApiObject(CachedApiObject):
     NAMESPACE_FILTER = None
 
-    Manager = NestedApiManager
+    Manager = CachedApiManager.from_queryset(NestedApiQuerySet)
     objects = Manager()
-
-    api_id = models.IntegerField()
 
     class Meta:
         abstract = True
