@@ -73,7 +73,7 @@ class AplusGraderMixin:
 
     def get(self, request, *args, **kwargs):
         fail = self.get_aplus_client(request)
-        return fail if fail else super().post(request, *args, **kwargs)
+        return fail if fail else super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         fail = self.get_aplus_client(request)
