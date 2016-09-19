@@ -288,12 +288,14 @@ class AplusClient(metaclass=AplusClientMetaclass):
         except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as err:
             return ConnectionErrorResponse(err, url)
 
-    def do_post(self, url, data):
+    def do_post(self, url, data, timeout=None):
         headers = self.get_headers()
         params = self.get_params()
+        if not timeout:
+            timeout = (3.2, 9.6)
         logger.debug("making POST '%s', headers=%r, params=%r, data=%r", url, headers, params, data)
         try:
-            return self.session.post(url, headers=headers, data=data, params=params, timeout=(3.2, 9.6))
+            return self.session.post(url, headers=headers, data=data, params=params, timeout=timeout)
         except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as err:
             return ConnectionErrorResponse(err, url)
 
@@ -354,5 +356,5 @@ class AplusGraderClient(AplusClient):
         self.__dict__['grading_data'] = data
         return data
 
-    def grade(self, data):
-        return self.do_post(self.grading_url, data)
+    def grade(self, data, **kwargs):
+        return self.do_post(self.grading_url, data, **kwargs)

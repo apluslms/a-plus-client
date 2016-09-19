@@ -22,19 +22,19 @@ class FakeResponse:
 
 
 class AplusClientDebugging:
-    def do_get(self, url):
+    def do_get(self, url, **kwargs):
         if url.startswith(TEST_URL_PREFIX):
             furl = url[len(TEST_URL_PREFIX):].strip('/').replace('/', '__')
             fn = ''.join((TEST_DATA_PATH, '/', furl, ".json"))
             logger.debug("making test GET '%s', file=%r", url, fn)
             with open(fn, 'r') as f:
                 return FakeResponse(fn, 200, f.read())
-        return super().do_get(url)
+        return super().do_get(url, **kwargs)
 
-    def do_post(self, url, data):
+    def do_post(self, url, data, **kwargs):
         if url.startswith(TEST_URL_PREFIX):
             logger.debug("making test POST '%s', data=%r", url, data)
             return FakeResponse(url, 200, "{'result': 'accepted'}")
-        return super().do_post(url, data)
+        return super().do_post(url, data, **kwargs)
 
 
