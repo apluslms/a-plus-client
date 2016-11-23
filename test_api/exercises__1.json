@@ -14,30 +14,25 @@
     "exercise_info": {
         "form_spec": [
             {
-                "type": "static",
-                "key": "field_0",
-                "description": "<p>Oppimateriaalin lukujen lopuissa oleviin palautelomakkeisiin vastaaminen on pakollinen osa kurssisuoritusta. <em>Tehtäväpisteet luvusta eivät tule voimaan ennen kuin olet vastannut!</em></p> ",
-                "required": false,
-                "title": ""
-            },
-            {
                 "type": "number",
                 "key": "timespent",
+                "title": "Ajankäyttö",
                 "required": true,
-                "minimum": 10,
-                "htmlClass": "form-group time-usage-question required standard place-inline",
-                "description": "<p><strong>Ajankäyttö:</strong> <span class=\"mustanswer\">(*) Pakollinen</span></p> <p>Kirjoita alle, kuinka monta minuuttia olet käyttänyt kokonaisuudessaan (materiaalin lukeminen, tehtävien tekeminen jne.) oppimateriaalin tähän lukuun. Viidentoista minuutin tai puolen tunnin tarkkuus riittää hyvin.</p> ",
-                "validationMessage": "Anna aika minuutteina.",
-                "title": ""
+                "minimum": 6,
+                "description": "<p>Kirjoita alle, kuinka monta minuuttia olet käyttänyt kokonaisuudessaan (materiaalin lukeminen, tehtävien tekeminen jne.) oppimateriaalin tähän lukuun. Viidentoista minuutin tai puolen tunnin tarkkuus riittää hyvin.</p>",
+                "htmlClass": "time-usage-question",
+                "validationMessage": "Anna aika minuutteina."
             },
             {
                 "type": "textarea",
-                "key": "field_2",
-                "required": false,
-                "description": "<p>Tämän ensimmäisen luvun kohdalla voit esimerkiksi kirjoittaa tähän virkkeen tai pari tunnelmistasi nyt kurssin alussa tai ensivaikutelmiasi kurssista. Voit myös kysyä jotain. <strong>Tässä luvussa sanallinen palautekohta ei ole pakollinen, mutta useassa tulevassa luvussa vastaava kohta on.</strong> (Siitä mainitaan erikseen sitten siellä.)</p> <p>Lähettämäsi tekstit tulevat kurssin henkilökunnan näkyviin. Vastaava opettaja tekee yleisistä ja muuten kiinnostavista kysymyksistä ja kommenteista koosteita (lähettäjät anonymisoiden). Koosteet julkaistaan osana oppimateriaalia. Tekstejä voidaan käyttää anonyymisti myös muihin opetuksen kehittämistarkoituksiin.</p> ",
-                "htmlClass": "form-group main-feedback-question voluntary standard place-on-own-line",
-                "title": ""
-           }
+                "key": "feedbackquestion",
+                "title": "Sanallinen kommentti tai kysymys",
+                "required": true,
+                "description": "<div class=\"feedbackinstruction hiddeninstruction container\"> <p><strong><a class=\"showinstruction toggleinstruction\">Näytä ohje</a><a class=\"hideinstruction toggleinstruction\">Piilota ohje</a></strong></p><div class=\"instructiontext container\"> <p>Palautelomakkeisiin vastaaminen on pakollinen osa kurssisuoritusta. Osassa luvuista, kuten tässä, myös sanallinen palautekohta on pakollinen.</p> </div> </div>",
+                "validationMessage": "Tämäkin kohta on täytettävä, jotta tehtäväpisteesi tästä luvusta vahvistetaan. Osassa muistakin luvuista on tällainen pakollinen sanallinen palautekohta. Osassa luvuista taas pakollista on vain aika-arvio.",
+                "htmlClass": "main-feedback-question"
+            }
+
         ],
         "resources": [ ]
     }
