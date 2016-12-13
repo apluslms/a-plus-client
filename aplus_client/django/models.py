@@ -80,6 +80,10 @@ class CachedApiObject(models.Model):
         age = timezone.now() - self.updated
         return age > self.TTL
 
+    def update_using(self, client):
+        data = client.load_data(self.url)
+        self.update_with(data)
+
     def update_with(self, api_obj, **kwargs):
         fields = (
             (f, f.name, f.related_model)
@@ -136,6 +140,10 @@ class NamespacedApiObject(CachedApiObject):
     class Meta:
         abstract = True
         unique_together = ('namespace', 'api_id')
+
+    def update_with(self, api_obj, **kwargs):
+        kwargs.setdefault('namespace', self.namespace)
+        super().update_with(api_obj, **kwargs)
 
 
 class NestedApiQuerySet(CachedApiQuerySet):
