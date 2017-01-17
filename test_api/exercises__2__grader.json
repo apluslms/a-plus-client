@@ -1,7 +1,7 @@
 {
-    "url": "http://testserver/api/v2/exercises/2/grader/",
+    "url": "http://testserver.testserver/api/v2/exercises/2/grader/",
     "exercise": {
         "id": 2,
-        "url": "http://testserver/api/v2/exercises/2/"
+        "url": "http://testserver.testserver/api/v2/exercises/2/"
     }
 }

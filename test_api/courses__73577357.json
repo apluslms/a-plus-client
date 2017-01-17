@@ -1,6 +1,6 @@
 {
     "id": 73577357,
-    "url": "http://testserver/api/v2/courses/73577357/",
+    "url": "http://testserver.testserver/api/v2/courses/73577357/",
     "code": "TEST-73577357",
     "name": "Test Test course",
     "html_url": "#aplus_course_73577357",

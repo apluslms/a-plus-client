@@ -22,7 +22,7 @@ def bad_submission_url(url):
     url = url.split('//', 1)[1]
     local = any((
         url.startswith(s)
-        for s in ('localhost', '127.0.0.1', 'testserver')
+        for s in ('localhost', '127.0.0.1', 'testserver', 'testserver.testserver')
     ))
     return local
 

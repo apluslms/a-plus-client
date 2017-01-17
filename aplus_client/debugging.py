@@ -2,7 +2,7 @@ import json
 import logging
 
 
-TEST_URL_PREFIX = "http://testserver/api/v2/"
+TEST_URL_PREFIX = "http://testserver.testserver/api/v2/"
 TEST_DATA_PATH = "test_api"
 
 logger = logging.getLogger('aplus_client.client')
