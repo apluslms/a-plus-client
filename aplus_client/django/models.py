@@ -123,7 +123,10 @@ class NamespacedApiQuerySet(CachedApiQuerySet):
 
     def update_object(self, obj, api_obj, namespace=None, **kwargs):
         if namespace is None:
-            namespace = obj.namespace or ApiNamespace.get_by_url(api_obj.url)
+            try:
+                namespace = obj.namespace
+            except ObjectDoesNotExist:
+                namespace = ApiNamespace.get_by_url(api_obj.url)
         try:
             obj.namespace
         except ObjectDoesNotExist:
