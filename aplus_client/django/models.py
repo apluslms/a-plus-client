@@ -98,6 +98,9 @@ class CachedApiObject(models.Model):
             )
         )
         for f, name, model in fields:
+            if name in kwargs:
+                setattr(self, name, kwargs[name])
+                continue
             try:
                 value = api_obj[name]
             except KeyError:
