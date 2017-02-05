@@ -168,6 +168,9 @@ class AplusApiList(AplusApiObject):
         for value in data:
             self._data.append(AplusApiObject._wrap(self._client, value))
 
+    def __iter__(self):
+        return iter(self._data)
+
     def __len__(self):
         return len(self._data)
 
@@ -191,14 +194,16 @@ class AplusApiPaginated(AplusApiList):
     """
     def __init__(self, data, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._count = data['count']
-        self._next = data['next']
-        self._previous = data['previous']
-        self._first_loaded = bool(self._previous is None)
-        self._last_loaded = bool(self._next is None)
-        # FIXME: handle multiple pages
-        # NOTE: start by finding first page
+        data = self.find_first(data)
         self.add_data(data)
+
+    @staticmethod
+    def find_first(data):
+        previous = data['previous']
+        if previous is not None:
+            data = self._client._load_cached_data(previous)
+            previous = data['previous']
+        return data
 
     @staticmethod
     def is_paginated(data, source_url=None):
@@ -207,8 +212,25 @@ class AplusApiPaginated(AplusApiList):
                 and frozenset(data.keys()) == frozenset(('count', 'next', 'previous', 'results'))
                 and isinstance(data['results'], list))
 
+    def __iter__(self):
+        yield from self._data
+        while True:
+            at = len(self._data)
+            if not self.load_next():
+                break
+            yield from self._data[at:]
+
+    def load_next(self):
+        if self._next:
+            data = self._client._load_cached_data(self._next)
+            self.add_data(data)
+            return True
+        return False
+
     def add_data(self, data):
         if isinstance(data, dict):
+            self._count = data['count']
+            self._next = data['next']
             data = data['results']
         super().add_data(data)
 
