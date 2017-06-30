@@ -1,7 +1,7 @@
 import datetime
 from functools import reduce
 from urllib.parse import urlsplit
-from django.conf import settings
+from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils import timezone
@@ -13,7 +13,7 @@ class ApiNamespace(models.Model):
     domain = models.CharField(max_length=255, db_index=True)
 
     class Meta:
-        abstract = not any((x in settings.INSTALLED_APPS for x in ('aplus_client', 'aplus_client.django')))
+        abstract = apps.get_containing_app_config(__name__) is None
         verbose_name = _("Namespace")
         verbose_name_plural = _("Namespaces")
 
