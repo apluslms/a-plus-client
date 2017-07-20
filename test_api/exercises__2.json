@@ -93,7 +93,7 @@
             {
                 "type": "boolean",
                 "key": "accept",
-                "title": "Accept all aobve inputs?",
+                "title": "Accept all above inputs?",
                 "required": true
             }
         ],
