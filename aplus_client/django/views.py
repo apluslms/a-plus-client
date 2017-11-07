@@ -37,6 +37,7 @@ class AplusGraderMixin:
     def get_aplus_client(self, request):
         submission_url = request.GET.get('submission_url', None)
         post_url = request.GET.get('post_url', None)
+        max_points = request.GET.get('max_points', None)
         language = request.GET.get('lang', None)
         debug = settings.DEBUG
 
@@ -57,8 +58,15 @@ class AplusGraderMixin:
             params['submission_url'] = submission_url
             post_url = request.build_absolute_uri('?' + urlencode(params))
 
+        if max_points:
+            try:
+                max_points = max(0, int(max_points))
+            except ValueError:
+                max_points = None
+
         self.submission_url = submission_url
         self.post_url = post_url
+        self.max_points = max_points
         self.aplus_client = AplusGraderClient(submission_url, debug_enabled=debug)
 
         # i18n
