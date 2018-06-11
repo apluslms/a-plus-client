@@ -1,6 +1,8 @@
 import requests
 import logging
 from cachetools import TTLCache
+from cgi import parse_header
+from os.path import isfile
 from urllib.parse import parse_qsl as urlparse_qsl, urlencode, urlsplit, urlunsplit
 
 from .debugging import AplusClientDebugging, FakeResponse
@@ -366,6 +368,24 @@ class AplusClient(metaclass=AplusClientMetaclass):
         url = self._get_full_url(url)
         data = self._load_cached_data(url)
         return AplusApiObject._wrap(client=self, data=data, source_url=url)
+
+    def load_file(self, filename, url):
+        # TODO: if-modified-sinze, cache and force support
+        if not isfile(filename):
+            url = self._get_full_url(url)
+            resp = self.do_get(url, stream=True)
+            if resp.status_code != 200:
+                return None
+            with open(filename, 'wb') as f:
+                for chunk in resp.iter_content(chunk_size=1024):
+                    if chunk:
+                        f.write(chunk)
+            header_cd = resp.headers.get('Content-Disposition')
+            if header_cd:
+                value, params = parse_header(header_cd)
+                if value == 'attachment' and 'filename' in params:
+                    filename = params['filename']
+        return filename
 
 
 class AplusTokenClient(AplusClient):
