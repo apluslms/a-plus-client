@@ -11,6 +11,8 @@
 *.orig
 
 /venv/
+/build/
+/dist/
 /*.egg-info/
 
 *.mo
