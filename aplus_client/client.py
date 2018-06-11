@@ -274,8 +274,19 @@ class AplusClient(metaclass=AplusClientMetaclass):
     """
     def __init__(self, version=None):
         self.api_version = version
+        self.base_url = None
         self.session = requests.session()
         self.__params = {}
+
+    @staticmethod
+    def api_base_url(url):
+        url = urlsplit_clean(url)
+        basepath = '/'.join(url.path.split('/', 3)[:3]) # only: /api/vN/
+        url = url._replace(path=basepath, query='', fragment='')
+        return url.geturl()
+
+    def set_base_url_from(self, url):
+        self.base_url = self.api_base_url(url)
 
     @staticmethod
     def normalize_url(url):
@@ -287,6 +298,13 @@ class AplusClient(metaclass=AplusClientMetaclass):
     @staticmethod
     def join_params(url, params):
         return urlsplit(url)._replace(query=urlencode(params)).geturl()
+
+    def _get_full_url(self, url):
+        if url[0] == '/':
+            if not self.base_url:
+                raise RuntimeError("APIClient doesn't support partial urls without base url")
+            url = self.base_url + url
+        return url
 
     def get_headers(self):
         accept = 'application/vnd.aplus+json'
@@ -300,16 +318,20 @@ class AplusClient(metaclass=AplusClientMetaclass):
     def get_params(self):
         return self.__params
 
-    def do_get(self, url):
-        headers = self.get_headers()
-        params = self.get_params()
-        logger.debug("making GET '%s', headers=%r, params=%r", url, headers, params)
+    def do_get(self, url, **kwargs):
+        url = self._get_full_url(url)
+        kwargs['headers'] = self.get_headers()
+        kwargs['params'] = self.get_params()
+        kwargs.setdefault('timeout', (3.2, 9.6))
+        logger.debug("making GET '%s', %s", url, kwargs)
+
         try:
-            return self.session.get(url, headers=headers, params=params, timeout=(3.2, 9.6))
+            return self.session.get(url, **kwargs)
         except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as err:
             return ConnectionErrorResponse(err, url)
 
     def do_post(self, url, data, timeout=None):
+        url = self._get_full_url(url)
         headers = self.get_headers()
         params = self.get_params()
         if not timeout:
@@ -341,6 +363,7 @@ class AplusClient(metaclass=AplusClientMetaclass):
         return data
 
     def load_data(self, url):
+        url = self._get_full_url(url)
         data = self._load_cached_data(url)
         return AplusApiObject._wrap(client=self, data=data, source_url=url)
 
