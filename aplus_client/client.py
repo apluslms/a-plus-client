@@ -1,9 +1,10 @@
 import requests
 import logging
-from urllib.parse import urlsplit, urlunsplit, parse_qsl as urlparse_qsl
 from cachetools import TTLCache
+from urllib.parse import parse_qsl as urlparse_qsl, urlencode, urlsplit, urlunsplit
 
 from .debugging import AplusClientDebugging, FakeResponse
+from .util import urlsplit_clean
 
 
 NoDefault = object()
@@ -278,16 +279,14 @@ class AplusClient(metaclass=AplusClientMetaclass):
 
     @staticmethod
     def normalize_url(url):
-        url = urlsplit(url)
-        if not url.netloc:
-            raise AttributeError("Invalid URL for api client: no network location")
-        if not url.scheme:
-            port = url.port
-            url = url._replace(scheme = 'https' if not port or port == 443 else 'http')
-
+        url = urlsplit_clean(url)
         params = urlparse_qsl(url.query)
         url = url._replace(query='', fragment='')
         return url.geturl(), params
+
+    @staticmethod
+    def join_params(url, params):
+        return urlsplit(url)._replace(query=urlencode(params)).geturl()
 
     def get_headers(self):
         accept = 'application/vnd.aplus+json'

@@ -5,26 +5,11 @@ from django.utils import translation
 
 from ..client import AplusGraderClient
 from ..debugging import TEST_URL_PREFIX
+from ..util import is_bad_url
 
 
 TEST_EXC_URL = urljoin(TEST_URL_PREFIX, "exercises/2/grader/")
 TEST_SUB_URL = urljoin(TEST_URL_PREFIX, "submissions/2/grader/")
-
-
-
-def bad_submission_url(url):
-    rel = not any((
-        url.startswith(s)
-        for s in ('http://', 'https://', '//')
-    ))
-    if rel:
-        return True
-    url = url.split('//', 1)[1]
-    local = any((
-        url.startswith(s)
-        for s in ('localhost', '127.0.0.1', 'testserver', 'testserver.testserver')
-    ))
-    return local
 
 
 class AplusGraderMixin:
@@ -51,7 +36,7 @@ class AplusGraderMixin:
                 post_url = request.build_absolute_uri('?' + urlencode(params))
             else:
                 return HttpResponseBadRequest("Missing required submission_url query parameter")
-        elif bad_submission_url(submission_url) and not debug:
+        elif is_bad_url(submission_url) and not debug:
             return HttpResponseBadRequest("Bad submission_url in query parameter")
         elif not post_url and debug:
             params = request.GET.copy()
