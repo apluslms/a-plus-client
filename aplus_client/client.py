@@ -332,15 +332,16 @@ class AplusClient(metaclass=AplusClientMetaclass):
         except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as err:
             return ConnectionErrorResponse(err, url)
 
-    def do_post(self, url, data, timeout=None):
+    def do_post(self, url, data=None, json=None, timeout=None):
+        assert data or json, 'You must specify either data or json'
         url = self._get_full_url(url)
         headers = self.get_headers()
         params = self.get_params()
         if not timeout:
             timeout = (3.2, 9.6)
-        logger.debug("making POST '%s', headers=%r, params=%r, data=%r", url, headers, params, data)
+        logger.debug("making POST '%s', headers=%r, params=%r, data=%r, json=%r", url, headers, params, data, json)
         try:
-            return self.session.post(url, headers=headers, data=data, params=params, timeout=timeout)
+            return self.session.post(url, headers=headers, data=data, json=json, params=params, timeout=timeout)
         except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout) as err:
             return ConnectionErrorResponse(err, url)
 
