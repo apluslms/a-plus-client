@@ -1,10 +1,10 @@
 import requests
 import logging
-from cachetools import TTLCache
 from cgi import parse_header
 from os.path import isfile
 from urllib.parse import parse_qsl as urlparse_qsl, urlencode, urlsplit, urlunsplit
 
+from .cache import InMemoryCache
 from .debugging import AplusClientDebugging, FakeResponse
 from .util import urlsplit_clean
 
@@ -259,7 +259,6 @@ class AplusApiError(AplusApiObject):
         self.message = data['detail']
 
 
-CACHE = TTLCache(maxsize=100, ttl=60)
 
 class AplusClientMetaclass(type):
     def __call__(cls, *args, **kwargs):
@@ -274,11 +273,12 @@ class AplusClient(metaclass=AplusClientMetaclass):
     Base class for A-Plus API client.
     Handles get/post requests and converting responses to AplusApiObjects
     """
-    def __init__(self, version=None):
+    def __init__(self, version=None, cache=None):
         self.api_version = version
         self.base_url = None
         self.session = requests.session()
         self.__params = {}
+        self._cache = InMemoryCache() if cache is None else cache
 
     @staticmethod
     def api_base_url(url):
@@ -349,25 +349,30 @@ class AplusClient(metaclass=AplusClientMetaclass):
         resp = self.do_get(url)
         if resp.status_code != 200:
             logger.info("Got status %d from url %s", resp.status_code, url)
-            return None
-        try:
-            return resp.json()
-        except ValueError:
-            return None
+            if resp.status_code == 404:
+                return None
+            resp.raise_for_status()
+        return resp.json()
 
-    def _load_cached_data(self, url):
-        data = CACHE.get(url, None)
-        if data is None:
-            data = self._load_json_data(url)
-            if data:
-                CACHE[url] = data
+    def _load_cached_data(self, url, skip_cache=False):
+        try:
+            if skip_cache:
+                raise KeyError
+            data = self._cache[url]
+        except KeyError:
+            try:
+                data = self._load_json_data(url)
+            except ValueError:
+                data = None
+            else:
+                self._cache[url] = data
         else:
             logger.debug("cache hit for %r", url)
         return data
 
-    def load_data(self, url):
+    def load_data(self, url, skip_cache=False):
         url = self._get_full_url(url)
-        data = self._load_cached_data(url)
+        data = self._load_cached_data(url, skip_cache=skip_cache)
         return AplusApiObject._wrap(client=self, data=data, source_url=url)
 
     def load_file(self, filename, url):
