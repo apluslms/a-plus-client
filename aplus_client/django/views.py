@@ -1,4 +1,5 @@
 from urllib.parse import urljoin, urlencode
+
 from django.conf import settings
 from django.http import HttpResponseBadRequest
 from django.utils import translation
@@ -8,8 +9,8 @@ from ..debugging import TEST_URL_PREFIX
 from ..util import is_bad_url
 
 
-TEST_EXC_URL = urljoin(TEST_URL_PREFIX, "exercises/2/grader/")
-TEST_SUB_URL = urljoin(TEST_URL_PREFIX, "submissions/2/grader/")
+TEST_EXC_URL = urljoin(TEST_URL_PREFIX, "exercises/%s/grader/")
+TEST_SUB_URL = urljoin(TEST_URL_PREFIX, "submissions/%s/grader/")
 
 
 class AplusGraderMixin:
@@ -30,9 +31,10 @@ class AplusGraderMixin:
             if debug:
                 # When we DEBUG mode is on, we use test resource
                 is_safe = request.method in ('GET', 'HEAD', 'OPTIONS')
-                submission_url = TEST_EXC_URL if is_safe else TEST_SUB_URL
+                test_id = request.GET.get('test', '2')
+                submission_url = (TEST_EXC_URL if is_safe else TEST_SUB_URL) % (test_id, )
                 params = request.GET.copy()
-                params['submission_url'] = TEST_SUB_URL
+                params['submission_url'] = TEST_SUB_URL % (test_id,)
                 post_url = request.build_absolute_uri('?' + urlencode(params))
             else:
                 return HttpResponseBadRequest("Missing required submission_url query parameter")
