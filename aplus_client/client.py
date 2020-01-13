@@ -20,8 +20,10 @@ class ConnectionErrorResponse(FakeResponse):
     We use error code 504 'Gateway Timeout'
     """
     def __init__(self, error, url):
+        self.error = error
         logger.critical("%s when requesting url '%s': %s", error.__class__.__name__, url, error)
-        super().__init__(url, 504, '')
+        reason = '%s: %s' % (error.__class__.__name__, error)
+        super().__init__(url, 504, reason)
 
 
 class AplusApiObject:

@@ -1,6 +1,8 @@
 import json
 import logging
 
+from requests.exceptions import HTTPError
+
 
 TEST_URL_PREFIX = "http://testserver.testserver/api/v2/"
 TEST_DATA_PATH = "test_api"
@@ -19,6 +21,18 @@ class FakeResponse:
             return json.loads(self.text) if self.text else None
         except ValueError as e:
             raise RuntimeError("Json error in {}: {}".format(self.url, e))
+
+    def raise_for_status(self):
+        if hasattr(self, 'error'):
+            raise self.error
+
+        msg = ''
+        if 400 <= self.status_code < 500:
+            msg = '%s Client Error for url %s' % (self.status_code, self.url)
+        elif 500 <= self.status_code < 600:
+            msg = '%s Server Error for url %s' % (self.status_code, self.url)
+        if msg:
+            raise HTTPError(msg, response=self)
 
 
 class AplusClientDebugging:
