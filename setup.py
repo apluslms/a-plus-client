@@ -36,7 +36,7 @@ setup(
     description='client library for aplus API',
     long_description=long_description,
     keywords='apluslms api',
-    url='https://github.com/Aalto-LeTech/aplus-client',
+    url='https://github.com/apluslms/a-plus-client',
     author='Jaakko Kantojärvi',
     author_email='jaakko.kantojarvi@aalto.fi',
     license='MIT',
@@ -56,8 +56,9 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
 
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3 :: Only',
     ],
 
