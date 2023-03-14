@@ -9,7 +9,7 @@ Installation
 
 .. code-block:: sh
 
-  pip install 'git+https://github.com/apluslms/a-plus-client.git@v1.1.0#egg=a_plus_client'
+  pip install 'git+https://github.com/apluslms/a-plus-client.git@v1.2.0#egg=a_plus_client'
 
 
 Usage examples
