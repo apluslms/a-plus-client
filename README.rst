@@ -9,7 +9,7 @@ Installation
 
 .. code-block:: sh
 
-  pip install 'git+https://github.com/apluslms/a-plus-client.git@v1.2.0#egg=a_plus_client'
+  pip install 'git+https://github.com/apluslms/a-plus-client.git@v1.3.0#egg=a_plus_client'
 
 
 Usage examples
@@ -68,4 +68,3 @@ Usage examples
           data.append(points)
 
   write_csv(output_file_path, data, field_names)
-
